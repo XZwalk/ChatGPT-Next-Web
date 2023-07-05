@@ -1,0 +1,21 @@
+# .coding-ci.yml
+# 匹配所有分支
+(**):
+  # 创建分支时自动创建创建开发环境
+  branch.create:
+    - name: vscode
+      services:
+        # 声明使用 vscode
+        - vscode
+      docker:
+        # 自定义开发环境
+        build: .ide/Dockerfile
+      wework:
+        title: 云原生开发
+      stages:
+        # - name: 执行自定义脚本
+        #   script:
+        #     - npm install
+        #     - npm run start
+        - name: ready
+          type: vscode:go
