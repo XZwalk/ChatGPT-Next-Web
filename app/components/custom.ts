@@ -25,34 +25,79 @@ function beigin() {
   fetchIDsData((ids) => {
     const sessions = getSessionsWithIds(ids);
     syncData(ids, sessions, (dataAry) => {
+      mergeData(dataAry);
       zxlog(`syncData done`);
     });
   });
 }
 
+function mergeData(dataAry: any) {
+  if (dataAry.length === 0) {
+    return;
+  }
 
-function getSessionsWithIds(ids:any) {
+  const jsonData = getLocalStoreData();
+  if (!jsonData || !jsonData.state || !jsonData.state.sessions) {
+    return;
+  }
+
+  const sessions = jsonData.state.sessions;
+
+  for (let i = 0; i < dataAry.length; i++) {
+    // 服务器返回数据
+    const serverItem = dataAry[i];
+    let sameIndex = -1;
+    for (let j = 0; j < sessions.length; j++) {
+      // 本地数据
+      const webItem = sessions[j];
+      if (webItem.id === serverItem.id) {
+        sameIndex = j;
+        break;
+      }
+    }
+
+    if (sameIndex >= 0) {
+      // 更新数据
+      sessions[sameIndex] = serverItem;
+    } else {
+      // 新增数据
+      sessions.push(serverItem);
+    }
+  }
+
+  localStorage.setItem('chat-next-web-store', JSON.stringify(jsonData));
+  location.reload();
+}
+
+
+function getLocalStoreData() {
   const localDataStr = localStorage.getItem('chat-next-web-store');
   try {
     const jsonData = JSON.parse(localDataStr || '{}');
-    if (jsonData && jsonData.state && jsonData.state.sessions) {
-      const resultAry = [];
-      const sessions = jsonData.state.sessions;
-      for (let index = 0; index < sessions.length; index++) {
-        const element = sessions[index];
-        const idInfo = ids[element.id] || {};
-        if (idInfo.lastUpdate !== element.lastUpdate) {
-          resultAry.push(element);
-        }
+    return jsonData;
+  } catch (error) {
+    return null;
+  }
+}
 
-        idInfo.lastUpdate = element.lastUpdate;
-        ids[element.id] = idInfo;
+
+function getSessionsWithIds(ids: any) {
+  const jsonData = getLocalStoreData();
+  if (jsonData && jsonData.state && jsonData.state.sessions) {
+    const resultAry = [];
+    const sessions = jsonData.state.sessions;
+    for (let index = 0; index < sessions.length; index++) {
+      const element = sessions[index];
+      const idInfo = ids[element.id] || {};
+      if (idInfo.lastUpdate !== element.lastUpdate) {
+        resultAry.push(element);
       }
 
-      return resultAry;
+      idInfo.lastUpdate = element.lastUpdate;
+      ids[element.id] = idInfo;
     }
-  } catch (error) {
-    return [];
+
+    return resultAry;
   }
 
   return [];
