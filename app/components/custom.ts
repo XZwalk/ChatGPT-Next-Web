@@ -16,17 +16,80 @@
  ************************************************************************************************************************************/
 
 // 解决报错：Type error: 'custom.ts' cannot be compiled under '--isolatedModules' because it is considered a global script file. Add an import, export, or an empty 'export {}' statement to make it a module.
-export {};
+export { };
 
 function beigin() {
   zxlog(`开始注入`);
 
   zxlog(`注入 done`);
+
+
+  fetchIDsData((ids) => {
+
+  });
+
+
 }
 
 beigin();
 
-/******************************************** public ********************************************/
+
+/************************ 登录操作 ************************/
+function getCookie() {
+  return {
+    userName: 'zhangxiang',
+    token: '123456'
+  };
+}
+
+
+/************************ 数据同步 ************************/
+function getApiDomain() {
+  const isTest = false;
+  if (!isTest) {
+    return `https://api.xiangzi.site:9007`;
+  }
+  return `http://localhost:9007`;
+}
+
+// 从云端获取候选人数据，云端不存在则创建一条数据
+function fetchIDsData(completeBlock: (arg0: any) => void) {
+  console.log(`fetchIDsData`);
+  const loginInfo = getCookie();
+  const indexUrl = `${getApiDomain()}/ChatGPT/ids?userName=${loginInfo.userName}&token=${loginInfo.token}`;
+  fetch(indexUrl, { method: 'GET' }).then(res => res.json()).then(function (result) {
+    console.log(result);
+    completeBlock(result);
+  });
+};
+
+
+function syncData(ids: any, sessions: any, completeBlock: (arg0: any) => void) {
+  const loginInfo = getCookie();
+  fetch(`${getApiDomain()}/TalkEverywhere`, {
+    headers: {
+      "Content-Type": "application/json"
+    },
+    method: "POST",
+    body: JSON.stringify({
+      userName: loginInfo.userName,
+      token: loginInfo.token,
+      ids: ids,
+      sessions: sessions
+    })
+  }).then(res => res.json()).then(result => {
+    if (result.code !== 200) {
+      console.log(result.msg);
+      return;
+    }
+    console.log(`数据创建成功`);
+    console.log(result);
+    completeBlock(result);
+  });
+}
+
+
+/************************ public ************************/
 function zxlog(logStr: string) {
   console.log(`%c${logStr}`, "color: blue; font-weight: bold;");
 }
