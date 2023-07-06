@@ -15,21 +15,54 @@
  *
  ************************************************************************************************************************************/
 
+import rehypeFilter from "react-markdown/lib/rehype-filter";
+import { json } from "stream/consumers";
+
 // 解决报错：Type error: 'custom.ts' cannot be compiled under '--isolatedModules' because it is considered a global script file. Add an import, export, or an empty 'export {}' statement to make it a module.
 export { };
 
 function beigin() {
-  zxlog(`开始注入`);
-
-  zxlog(`注入 done`);
 
 
+  zxlog(`开始 获取云端数据`);
   fetchIDsData((ids) => {
-
+    const sessions = getSessionsWithIds(ids);
+    syncData(ids, sessions, (dataAry) => {
+      zxlog(`syncData done`);
+    });
   });
-
-
 }
+
+
+function getSessionsWithIds(ids:any) {
+  const localDataStr = localStorage.getItem('chat-next-web-store');
+  try {
+    const jsonData = JSON.parse(localDataStr || '{}');
+    if (jsonData && jsonData.state && jsonData.state.sessions) {
+      const resultAry = [];
+      const sessions = jsonData.state.sessions;
+      for (let index = 0; index < sessions.length; index++) {
+        const element = sessions[index];
+        const idInfo = ids[element.id] || {};
+        if (idInfo.lastUpdate !== element.lastUpdate) {
+          resultAry.push(element);
+        }
+
+        idInfo.lastUpdate = element.lastUpdate;
+        ids[element.id] = idInfo;
+      }
+
+      return resultAry;
+    }
+  } catch (error) {
+    return [];
+  }
+
+  return [];
+}
+
+
+
 
 beigin();
 
@@ -58,15 +91,19 @@ function fetchIDsData(completeBlock: (arg0: any) => void) {
   const loginInfo = getCookie();
   const indexUrl = `${getApiDomain()}/ChatGPT/ids?userName=${loginInfo.userName}&token=${loginInfo.token}`;
   fetch(indexUrl, { method: 'GET' }).then(res => res.json()).then(function (result) {
+    if (result.code !== 200) {
+      console.log(result.msg);
+      return;
+    }
     console.log(result);
-    completeBlock(result);
+    completeBlock(result.data);
   });
 };
 
 
 function syncData(ids: any, sessions: any, completeBlock: (arg0: any) => void) {
   const loginInfo = getCookie();
-  fetch(`${getApiDomain()}/TalkEverywhere`, {
+  fetch(`${getApiDomain()}/ChatGPT/sync`, {
     headers: {
       "Content-Type": "application/json"
     },
@@ -84,7 +121,7 @@ function syncData(ids: any, sessions: any, completeBlock: (arg0: any) => void) {
     }
     console.log(`数据创建成功`);
     console.log(result);
-    completeBlock(result);
+    completeBlock(result.data);
   });
 }
 
