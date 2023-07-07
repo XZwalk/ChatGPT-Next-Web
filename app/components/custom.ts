@@ -233,9 +233,18 @@ function syncData(store: any, completeBlock: (arg0: any) => void) {
     body: JSON.stringify({
       userName: loginInfo.userName,
       token: loginInfo.token,
-      store: store
+      store: store,
+      deviceToken: getDeviceToken(),
     })
   }).then(res => res.json()).then(result => {
+    if (result.code === 9100) {
+      // 设备发生变更
+      zxlog(`/ChatGPT/sync：${result.msg}`);
+      alert(`检测到在其他设备登录，点击确认按钮，立马刷新页面`);
+      location.reload();
+      return;
+    }
+
     if (result.code !== 200) {
       zxlog(`/ChatGPT/sync：${result.msg}`);
       return;
