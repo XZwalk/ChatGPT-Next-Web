@@ -61,7 +61,10 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
 
     try {
       const access_control = JSON.parse(localStorage.getItem('access-control') || '{}');
-      access_control.state.accessCode = deviceInfo.accessCode;
+      // 授权码
+      access_control.state.accessCode = deviceInfo.accessCode || '';
+      // openai的key
+      access_control.state.token = deviceInfo.apiKey || '';
       localStorage.setItem('access-control', JSON.stringify(access_control));
       zxlog(`登录成功，写入 access-control`);
     } catch (error) {
