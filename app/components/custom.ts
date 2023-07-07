@@ -79,11 +79,13 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
 
     getAllChatData((allData) => {
       if (allData && allData.state) {
+        localStorage.setItem('chat-next-web-store', JSON.stringify(allData));
         if (typeof alert !== 'undefined') {
           alert("检测到更换设备登录，需要把服务器数据覆盖到本地，如果不想覆盖本地数据，不要点击确定按钮，请立即关闭该页面，否则数据会自动覆盖！！！");
         }
-        localStorage.setItem('chat-next-web-store', JSON.stringify(allData));
-        location.reload();
+        window.setTimeout(() => {
+          location.reload();
+        }, 1000);
         return;
       }
 
