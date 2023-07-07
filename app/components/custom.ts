@@ -361,15 +361,15 @@ function monitorPageVisible() {
     document.addEventListener("visibilitychange", function () {
       if (document.visibilityState === "hidden") {
         // 页面进入后台时的操作
-        zxlog("页面进入后台，先同步一次数据，之后停止数据同步....");
+        monitorlog("页面进入后台，先同步一次数据，之后停止数据同步....");
         window.clearInterval(autoSyncTimeRepeat);
         autoSyncTimeRepeat = null;
         syncDataToServer();
       } else {
         // 页面从后台返回时的操作
-        zxlog("页面从后台返回，开启自动同步数据");
+        monitorlog("页面从后台返回，先检查设备登录状态，之后开启自动同步数据");
         if (autoSyncTimeRepeat) {
-          zxlog("检测到autoSyncTimeRepeat对象已存在，不执行开启逻辑");
+          monitorlog("检测到autoSyncTimeRepeat对象已存在，不执行开启逻辑");
         } else {
           // 从后台回来先检查设备是否更换，再进行操作，确保用户切到前台的时候进行提问，但是设备已更换，导致数据丢失
           checkServerCurrentDeviceToken((isSuccess) => {
@@ -391,4 +391,8 @@ function monitorPageVisible() {
 /************************ public ************************/
 function zxlog(logStr: string) {
   console.log(`%c${logStr}`, "color: blue; font-weight: bold;");
+}
+
+function monitorlog(logStr: string) {
+  console.log(`%c${logStr}`, "color: red; font-weight: bold;");
 }
