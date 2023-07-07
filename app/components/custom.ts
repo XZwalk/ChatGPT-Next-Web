@@ -62,7 +62,7 @@ function syncDataToServer() {
 }
 
 function autoSyncData() {
-  zxlog(`\n\n-----------开启自动同步逻辑-----------\n\n`);
+  zxlog(`\n\n-----------开启自动同步逻辑，每${timeInterval}分钟上传一次数据-----------\n\n`);
   // 先停止再开启，防止重复
   window.clearInterval(autoSyncTimeRepeat);
 
@@ -294,7 +294,7 @@ function checkServerCurrentDeviceToken(completeBlock: (arg0: boolean | null) => 
     console.log(result);
     const localDeviceToken = getDeviceToken();
     if (result.code === 200 && result.data === localDeviceToken) {
-      zxlog(`检测服务器deviceToken：与本地一致`);
+      zxlog(`检测服务器deviceToken：与本地一致，当前登录状态正常。`);
       completeBlock(true);
       return;
     }
