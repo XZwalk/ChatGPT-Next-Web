@@ -54,27 +54,6 @@ function autoSyncData() {
   }, timeInterval * 60 * 1000);
 }
 
-
-
-// 替换掉网页的localStorage方法
-function hookLocalStorage() {
-  // 创建自定义储存类
-  class CustomLocalStorage {
-    setItem(key:any, value:any) {
-      zxlog(`setItem ${key}`);
-    }
-  }
-
-  var customLocalStorage = new CustomLocalStorage();
-  // 将新创建的实例赋值给localStorage
-  Object.defineProperty(window, 'localStorage', {
-    value: customLocalStorage,
-    writable: true,
-  });
-
-  zxlog('hook localStorage');
-}
-
 function loginMyServer(completeBlock: (arg0: any) => void) {
   zxlog(`登录服务器......`);
   deviceLogin((deviceInfo) => {
@@ -105,16 +84,17 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
 
     getAllChatData((allData) => {
       if (allData && allData.state) {
-        localStorage.setItem('chat-next-web-store', JSON.stringify(allData));
-        zxlog(`写入数据到 chat-next-web-store`);
-        hookLocalStorage();
-        // if (typeof alert !== 'undefined') {
-        //   alert("检测到更换设备登录，需要把服务器数据覆盖到本地，如果不想覆盖本地数据，不要点击确定按钮，请立即关闭该页面，否则数据会自动覆盖！！！");
-        // }
+        showLoading('检测到更换设备登录，需要把服务器数据覆盖到本地，正在执行数据覆盖操作，请勿刷新页面或者进行其他操作......');
 
         window.setTimeout(() => {
-          // location.href = `https://chatgpt.xiangzi.site`;
-        }, 1000);
+          // 这里不能直接写入，页面节点加载较慢，可能数据写入成功以后又被覆盖掉了，所以得等页面加载完成以后再写入数据，防止数据被覆盖掉
+          localStorage.setItem('chat-next-web-store', JSON.stringify(allData));
+          zxlog(`写入数据到 chat-next-web-store`);
+          setTimeout(() => {
+            showLoading('数据替换完成，准备刷新页面，请稍候......');
+            location.reload();
+          }, 1000);
+        }, 10000);
         return;
       }
 
@@ -151,6 +131,30 @@ function getDeviceToken() {
 
 beigin();
 
+
+/************************ loading ************************/
+function showLoading(descStr : any) {
+  if (!document.getElementById('div_pop')) {
+    const popDom = document.createElement('div');
+    popDom.innerHTML = `
+    <div id="div_pop" style="position: fixed; z-index: 10000; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4);">
+      <div id="content" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 500px; background-color: #fff; padding: 20px; border-radius: 10px; text-align: center;">
+        ${descStr || '数据替换中......'}
+      </div>
+    </div>
+    `;
+    document.body.appendChild(popDom);
+    return;
+  }
+  document.getElementById('content')!.innerHTML = descStr;
+}
+
+// function hideLoading() {
+//   const popDom = document.getElementById('div_pop');
+//   if (popDom) {
+//     popDom.parentNode!.removeChild(popDom);
+//   }
+// }
 
 /************************ 登录操作 ************************/
 function getCookie() {
