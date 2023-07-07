@@ -1,0 +1,2 @@
+	url = https://e.coding.net/ZXWalk/chatgpt-next-web/ChatGPT-Next-Web.git
+	url = https://github.com/XZwalk/ChatGPT-Next-Web.git
