@@ -59,6 +59,7 @@ function syncDataToServer() {
 }
 
 function autoSyncData() {
+  zxlog(`-----------开启自动同步逻辑-----------`);
   // 先停止再开启，防止重复
   window.clearInterval(autoSyncTimeRepeat);
 
@@ -156,7 +157,7 @@ function showLoading(descStr: any) {
     const popDom = document.createElement('div');
     popDom.innerHTML = `
     <div id="div_pop" style="position: fixed; z-index: 10000; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4);">
-      <div id="content" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 500px; background-color: #fff; padding: 20px; border-radius: 10px; text-align: center;">
+      <div id="content" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 500px;padding: 20px; border-radius: 10px; text-align: center;color: #3c763d;background-color: #dff0d8;border-color: #d6e9c6;">
         ${descStr || '数据替换中......'}
       </div>
     </div>
@@ -177,7 +178,7 @@ function loadingWithDesc(descStr: string, time: number, completeBlock: () => voi
       return;
     }
 
-    showLoading(`${descStr} ${index}s ......`);
+    showLoading(`${descStr} <span style="color:red;font-weight:bold;">${index}</span>s ......`);
     index--;
   }, 1000);
 }
@@ -352,11 +353,16 @@ function monitorPageVisible() {
         // 页面进入后台时的操作
         zxlog("页面进入后台，先同步一次数据，之后停止数据同步....");
         window.clearInterval(autoSyncTimeRepeat);
+        autoSyncTimeRepeat = null;
         syncDataToServer();
       } else {
         // 页面从后台返回时的操作
         zxlog("页面从后台返回，开启自动同步数据");
-        autoSyncData();
+        if (autoSyncTimeRepeat) {
+          zxlog("检测到autoSyncTimeRepeat对象已存在，不执行开启逻辑");
+        } else {
+          autoSyncData();
+        }
       }
     });
   }, 5000);
