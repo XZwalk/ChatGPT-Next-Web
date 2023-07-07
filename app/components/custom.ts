@@ -41,7 +41,7 @@ function beigin() {
 
 
 function syncDataToServer() {
-  zxlog(`\n\n****************${new Date()} 准备同步数据****************`);
+  zxlog(`\n\n\n****************${new Date()} 准备同步数据****************`);
   const nowDataStr = localStorage.getItem('chat-next-web-store');
   if (nowServerDataStr === nowDataStr) {
     zxlog(`服务器数据与本地数据一致，不上传数据，${timeInterval}分钟后继续检查`);
@@ -50,19 +50,19 @@ function syncDataToServer() {
         // 设备已更换，停止数据同步，并提示
         stopSyncData();
       }
-      zxlog(`********************本次同步完成********************\n\n`);
+      zxlog(`********************本次同步完成********************\n\n\n`);
     });
     return;
   }
 
   syncData(getLocalStoreData(), () => {
     nowServerDataStr = nowDataStr;
-    zxlog(`********************本次同步完成********************\n\n`);
+    zxlog(`********************本次同步完成********************\n\n\n`);
   });
 }
 
 function autoSyncData() {
-  zxlog(`\n\n-----------开启自动同步逻辑，每${timeInterval}分钟上传一次数据-----------\n\n`);
+  zxlog(`\n\n\n-----------开启自动同步逻辑，每${timeInterval}分钟上传一次数据-----------\n\n\n`);
   // 先停止再开启，防止重复
   window.clearInterval(autoSyncTimeRepeat);
 
