@@ -50,7 +50,7 @@ function autoSyncData() {
 }
 
 function loginMyServer(completeBlock: (arg0: any) => void) {
-  zxlog(`连接服务器......`);
+  zxlog(`登录服务器......`);
   deviceLogin((deviceInfo) => {
     if (!deviceInfo) {
       // 获取信息失败，登录失败，404
@@ -76,6 +76,9 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
 
     getAllChatData((allData) => {
       if (allData && allData.state) {
+        if (typeof alert !== 'undefined') {
+          alert("检测到更换设备登录，需要把服务器数据覆盖到本地，如果不想覆盖本地数据，不要点击确定按钮，请立即关闭该页面，否则数据会自动覆盖！！！");
+        }
         localStorage.setItem('chat-next-web-store', JSON.stringify(allData));
         location.reload();
         return;
@@ -187,12 +190,11 @@ function getApiDomain() {
 
 
 function deviceLogin(completeBlock: (arg0: any) => void) {
-  console.log(`deviceLogin`);
   const loginInfo = getCookie();
   const indexUrl = `${getApiDomain()}/ChatGPT/login?userName=${loginInfo.userName}&token=${loginInfo.token}&deviceToken=${getDeviceToken()}`;
   fetch(indexUrl, { method: 'GET' }).then(res => res.json()).then(function (result) {
     if (result.code !== 200) {
-      console.log(`/ChatGPT/login：${result.msg}`);
+      zxlog(`/ChatGPT/login：${result.msg}`);
       completeBlock(null);
       return;
     }
@@ -204,12 +206,11 @@ function deviceLogin(completeBlock: (arg0: any) => void) {
 
 // 从云端获取候选人数据，云端不存在则创建一条数据
 function getAllChatData(completeBlock: (arg0: any) => void) {
-  console.log(`getAllChatData`);
   const loginInfo = getCookie();
   const indexUrl = `${getApiDomain()}/ChatGPT/allData?userName=${loginInfo.userName}&token=${loginInfo.token}`;
   fetch(indexUrl, { method: 'GET' }).then(res => res.json()).then(function (result) {
     if (result.code !== 200) {
-      console.log(`/ChatGPT/allData：${result.msg}`);
+      zxlog(`/ChatGPT/allData：${result.msg}`);
       return;
     }
     console.log(result);
@@ -219,6 +220,10 @@ function getAllChatData(completeBlock: (arg0: any) => void) {
 
 
 function syncData(store: any, completeBlock: (arg0: any) => void) {
+  if (!store || JSON.stringify(store).length <= 4) {
+    zxlog(`本次读取的store数据异常，数据不上传，请检查！`);
+    return;
+  }
   const loginInfo = getCookie();
   fetch(`${getApiDomain()}/ChatGPT/sync`, {
     headers: {
@@ -232,10 +237,10 @@ function syncData(store: any, completeBlock: (arg0: any) => void) {
     })
   }).then(res => res.json()).then(result => {
     if (result.code !== 200) {
-      console.log(`/ChatGPT/sync：${result.msg}`);
+      zxlog(`/ChatGPT/sync：${result.msg}`);
       return;
     }
-    console.log(`数据上传到服务器成功`);
+    zxlog(`数据上传到服务器成功`);
     console.log(result);
     completeBlock(result.data);
   });
