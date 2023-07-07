@@ -49,6 +49,7 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
     if (!deviceInfo) {
       // 获取信息失败，登录失败，404
       console.log(`登录失败`);
+      showLoginPop();
       return;
     }
 
@@ -110,9 +111,57 @@ beigin();
 
 /************************ 登录操作 ************************/
 function getCookie() {
+  let cookieStr = null;
+  if (typeof localStorage !== 'undefined') {
+    cookieStr = localStorage.getItem('myCookie');
+  }
+  if (cookieStr) {
+    return JSON.parse(cookieStr);
+  }
   return {
-    userName: 'zhangxiang',
-    token: '123456'
+    userName: '',
+    token: ''
+  };
+  // return {
+  //   userName: 'zhangxiang',
+  //   token: '12345633'
+  // };
+}
+
+function showLoginPop() {
+
+  if (!document.getElementById('div_pop')) {
+    const popDom = document.createElement('div');
+    popDom.innerHTML = `
+    <div id="div_pop" style="position: fixed;z-index: 10000;top: 0;left: 0;width: 100%;height: 100%;background-color: rgba(0, 0, 0, 0.4);">
+        <div style="width: 50%;margin-left: 25%;background-color: #fff;padding: 10px 30px 30px 30px;margin-top: 200px;border-radius: 10px;text-align: center;">
+          <h3>登录账号</h3>
+          <span>用户名：</span><input id="input_userName" />
+          <br/>
+          <br/>
+          <span> token：</span><input id="input_token" />
+          <br/>
+          <button id="button_login" style="margin-top:20px">登录</button>
+        </div>
+    </div>
+    `;
+    document.body.appendChild(popDom);
+  }
+
+  document.getElementById('button_login').onclick = function () {
+    const userName = document.getElementById('input_userName').value;
+    const token = document.getElementById('input_token').value;
+    if (!userName || !token) {
+      window.alert(`输入内容不能为空`);
+      return;
+    }
+
+    localStorage.setItem('myCookie', JSON.stringify({
+      userName: userName,
+      token: token
+    }));
+
+    location.reload();
   };
 }
 
@@ -134,6 +183,7 @@ function deviceLogin(completeBlock: (arg0: any) => void) {
   fetch(indexUrl, { method: 'GET' }).then(res => res.json()).then(function (result) {
     if (result.code !== 200) {
       console.log(result.msg);
+      completeBlock(null);
       return;
     }
     console.log(result);
