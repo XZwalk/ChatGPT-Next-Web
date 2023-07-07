@@ -28,7 +28,12 @@ function beigin() {
 
   loginMyServer(() => {
     zxlog(`启动自动同步程序，每${timeInterval}分钟同步一次`);
+    // 先同步一次数据，将本地数据上传到云端
+    syncDataToServer();
+    // 开启自动同步
     autoSyncData();
+    // 监控页面活跃状态
+    monitorPageVisible();
   });
 }
 
@@ -54,7 +59,9 @@ function syncDataToServer() {
 }
 
 function autoSyncData() {
-  syncDataToServer();
+  // 先停止再开启，防止重复
+  window.clearInterval(autoSyncTimeRepeat);
+
   autoSyncTimeRepeat = window.setInterval(() => {
     syncDataToServer();
   }, timeInterval * 60 * 1000);
@@ -334,6 +341,25 @@ function syncData(store: any, completeBlock: (arg0: any) => void) {
     console.log(result);
     completeBlock(result.data);
   });
+}
+
+/************************ 前后台 ************************/
+function monitorPageVisible() {
+  setTimeout(() => {
+    zxlog(`开启网页活跃状态监控`);
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "hidden") {
+        // 页面进入后台时的操作
+        zxlog("页面进入后台，先同步一次数据，之后停止数据同步....");
+        window.clearInterval(autoSyncTimeRepeat);
+        syncDataToServer();
+      } else {
+        // 页面从后台返回时的操作
+        zxlog("页面从后台返回，开启自动同步数据");
+        autoSyncData();
+      }
+    });
+  }, 5000);
 }
 
 
