@@ -18,6 +18,10 @@
 // 解决报错：Type error: 'custom.ts' cannot be compiled under '--isolatedModules' because it is considered a global script file. Add an import, export, or an empty 'export {}' statement to make it a module.
 export { };
 
+let nowServerDataStr: any = null;
+let timeInterval: number = 2;
+
+
 function beigin() {
   zxlog(`开始 获取云端数据`);
 
@@ -27,20 +31,19 @@ function beigin() {
 }
 
 
-let nowServerDataStr: any = null;
 function autoSyncData() {
   window.setInterval(() => {
     zxlog(`准备同步数据`);
     const nowDataStr = localStorage.getItem('chat-next-web-store');
     if (nowServerDataStr === nowDataStr) {
-      zxlog(`${new Date()} 服务器数据与本地数据一致，不上传数据`);
+      zxlog(`${new Date()} 服务器数据与本地数据一致，不上传数据，${timeInterval}分钟后继续检查`);
       return;
     }
 
     syncData(getLocalStoreData(), () => {
       nowServerDataStr = nowDataStr;
     });
-  }, 2 * 1000);
+  }, timeInterval * 60 * 1000);
 }
 
 function loginMyServer(completeBlock: (arg0: any) => void) {
