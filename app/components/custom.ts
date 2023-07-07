@@ -21,7 +21,7 @@ export { };
 // 定义常量
 let nowServerDataStr: any = null;
 let timeInterval: number = 2;
-
+let autoSyncTimeRepeat: any = null;
 
 function beigin() {
   zxlog(`程序注入成功`);
@@ -38,6 +38,12 @@ function syncDataToServer() {
   const nowDataStr = localStorage.getItem('chat-next-web-store');
   if (nowServerDataStr === nowDataStr) {
     zxlog(`服务器数据与本地数据一致，不上传数据，${timeInterval}分钟后继续检查`);
+    checkServerCurrentDeviceToken((isSuccess) => {
+      if (!isSuccess) {
+        // 设备已更换，停止数据同步，并提示
+        stopSyncData();
+      }
+    });
     return;
   }
 
@@ -49,9 +55,16 @@ function syncDataToServer() {
 
 function autoSyncData() {
   syncDataToServer();
-  window.setInterval(() => {
+  autoSyncTimeRepeat = window.setInterval(() => {
     syncDataToServer();
   }, timeInterval * 60 * 1000);
+}
+
+function stopSyncData() {
+  window.clearInterval(autoSyncTimeRepeat);
+  zxlog(`!!!数据同步已停止!!!`);
+  alert(`检测到在其他设备登录，点击确定按钮，立马刷新页面，在当前设备登录`);
+  location.reload();
 }
 
 function loginMyServer(completeBlock: (arg0: any) => void) {
@@ -256,6 +269,23 @@ function deviceLogin(completeBlock: (arg0: any) => void) {
 };
 
 
+function checkServerCurrentDeviceToken(completeBlock: (arg0: boolean | null) => void) {
+  const loginInfo = getCookie();
+  const indexUrl = `${getApiDomain()}/ChatGPT/deviceToken?userName=${loginInfo.userName}&token=${loginInfo.token}`;
+  fetch(indexUrl, { method: 'GET' }).then(res => res.json()).then(function (result) {
+    console.log(result);
+    const localDeviceToken = getDeviceToken();
+    if (result.code === 200 && result.data === localDeviceToken) {
+      zxlog(`检测服务器deviceToken：与本地一致`);
+      completeBlock(true);
+      return;
+    }
+
+    zxlog(`检测服务器deviceToken：已更换设备登录，停止数据同步`);
+    completeBlock(false);
+  });
+}
+
 // 从云端获取候选人数据，云端不存在则创建一条数据
 function getAllChatData(completeBlock: (arg0: any) => void) {
   const loginInfo = getCookie();
@@ -292,8 +322,7 @@ function syncData(store: any, completeBlock: (arg0: any) => void) {
     if (result.code === 9100) {
       // 设备发生变更
       zxlog(`/ChatGPT/sync：${result.msg}`);
-      alert(`检测到在其他设备登录，点击确认按钮，立马刷新页面，在当前设备登录`);
-      location.reload();
+      stopSyncData();
       return;
     }
 
