@@ -138,16 +138,19 @@ function showLoginPop() {
   if (!document.getElementById('div_pop')) {
     const popDom = document.createElement('div');
     popDom.innerHTML = `
-    <div id="div_pop" style="position: fixed;z-index: 10000;top: 0;left: 0;width: 100%;height: 100%;background-color: rgba(0, 0, 0, 0.4);">
-        <div style="width: 50%;margin-left: 25%;background-color: #fff;padding: 10px 30px 30px 30px;margin-top: 200px;border-radius: 10px;text-align: center;">
-          <h3>登录账号</h3>
-          <span>用户名：</span><input id="input_userName" />
-          <br/>
-          <br/>
-          <span> token：</span><input id="input_token" />
-          <br/>
-          <button id="button_login" style="margin-top:20px">登录</button>
+    <div id="div_pop" style="position: fixed; z-index: 10000; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4);">
+      <div id="content" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 500px; background-color: #fff; padding: 20px; border-radius: 10px; text-align: center;">
+        <h3 style="margin-bottom: 20px;margin-top: 0;">登录账号</h3>
+        <div style="margin-bottom: 10px;">
+          <label for="input_userName" style="display: block; margin-bottom: 5px;">用户名</label>
+          <input id="input_userName" type="text" style="width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 5px;">
         </div>
+        <div style="margin-bottom: 10px;">
+          <label for="input_token" style="display: block; margin-bottom: 5px;">Token</label>
+          <input id="input_token" type="text" style="width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 5px;">
+        </div>
+        <button id="button_login" style="margin-top: 20px; padding: 10px 20px; background-color: #4CAF50; color: #fff; border: none; border-radius: 5px; cursor: pointer;">登录</button>
+      </div>
     </div>
     `;
     document.body.appendChild(popDom);
