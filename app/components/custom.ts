@@ -18,14 +18,16 @@
 // 解决报错：Type error: 'custom.ts' cannot be compiled under '--isolatedModules' because it is considered a global script file. Add an import, export, or an empty 'export {}' statement to make it a module.
 export { };
 
+// 定义常量
 let nowServerDataStr: any = null;
 let timeInterval: number = 2;
 
 
 function beigin() {
-  zxlog(`开始 获取云端数据`);
+  zxlog(`程序注入成功`);
 
   loginMyServer(() => {
+    zxlog(`启动自动同步程序，每${timeInterval}分钟同步一次`);
     autoSyncData();
   });
 }
@@ -48,8 +50,8 @@ function autoSyncData() {
 }
 
 function loginMyServer(completeBlock: (arg0: any) => void) {
+  zxlog(`连接服务器......`);
   deviceLogin((deviceInfo) => {
-
     if (!deviceInfo) {
       // 获取信息失败，登录失败，404
       console.log(`登录失败`);
@@ -61,13 +63,13 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
       const access_control = JSON.parse(localStorage.getItem('access-control') || '{}');
       access_control.state.accessCode = deviceInfo.accessCode;
       localStorage.setItem('access-control', JSON.stringify(access_control));
-      zxlog(`写入 access-control`);
+      zxlog(`登录成功，写入 access-control`);
     } catch (error) {
       console.log(error);
     }
 
     if (!deviceInfo.isChangeDevice) {
-      zxlog(`设备信息未改变`);
+      zxlog(`本次登录，设备信息未改变，不覆盖本机数据`);
       completeBlock(true);
       return;
     }
@@ -79,7 +81,7 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
         return;
       }
 
-      zxlog(`获取全量数据异常`);
+      zxlog(`获取全量数据异常，有可能为首次登录，服务器无数据，不覆盖本机数据`);
       completeBlock(true);
     });
   });
