@@ -148,9 +148,11 @@ function showLoginPop() {
     document.body.appendChild(popDom);
   }
 
-  document.getElementById('button_login').onclick = function () {
-    const userName = document.getElementById('input_userName').value;
-    const token = document.getElementById('input_token').value;
+  document.getElementById('button_login')!.onclick = function () {
+    const userNameInput = document.getElementById('input_userName') as HTMLInputElement;
+    const tokenInput = document.getElementById('input_token') as HTMLInputElement;
+    const userName = userNameInput.value;
+    const token = tokenInput.value;
     if (!userName || !token) {
       window.alert(`输入内容不能为空`);
       return;
