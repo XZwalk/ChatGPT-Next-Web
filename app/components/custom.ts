@@ -33,15 +33,16 @@ function beigin() {
 
 function autoSyncData() {
   window.setInterval(() => {
-    zxlog(`准备同步数据`);
+    zxlog(`${new Date()} 准备同步数据`);
     const nowDataStr = localStorage.getItem('chat-next-web-store');
     if (nowServerDataStr === nowDataStr) {
-      zxlog(`${new Date()} 服务器数据与本地数据一致，不上传数据，${timeInterval}分钟后继续检查`);
+      zxlog(`服务器数据与本地数据一致，不上传数据，${timeInterval}分钟后继续检查`);
       return;
     }
 
     syncData(getLocalStoreData(), () => {
       nowServerDataStr = nowDataStr;
+      zxlog(`********************本次同步完成********************\n\n`);
     });
   }, timeInterval * 60 * 1000);
 }
@@ -230,7 +231,7 @@ function syncData(store: any, completeBlock: (arg0: any) => void) {
       console.log(result.msg);
       return;
     }
-    console.log(`数据上传成功`);
+    console.log(`数据上传到服务器成功`);
     console.log(result);
     completeBlock(result.data);
   });
