@@ -22,6 +22,8 @@ export { };
 let nowServerDataStr: any = null;
 let timeInterval: number = 2;
 let autoSyncTimeRepeat: any = null;
+// 是否展示设备更换的提示弹窗
+let alertChangeDeviceShown: boolean = false;
 
 function beigin() {
   zxlog(`程序注入成功`);
@@ -69,9 +71,16 @@ function autoSyncData() {
 }
 
 function stopSyncData() {
-  window.clearInterval(autoSyncTimeRepeat);
+  if (alertChangeDeviceShown) {
+    zxlog(`当前已展示停止更新数据弹窗，此次不展示`);
+    return;
+  }
+  alertChangeDeviceShown = true;
   zxlog(`!!!数据同步已停止!!!`);
+  window.clearInterval(autoSyncTimeRepeat);
+  autoSyncTimeRepeat = null;
   alert(`检测到在其他设备登录，点击确定按钮，立马刷新页面，在当前设备登录`);
+  alertChangeDeviceShown = false;
   location.reload();
 }
 
