@@ -30,10 +30,10 @@ function beigin() {
 
   loginMyServer(() => {
     zxlog(`启动自动同步程序，每${timeInterval}分钟同步一次`);
-    // 先同步一次数据，将本地数据上传到云端
-    syncDataToServer();
     // 开启自动同步
     autoSyncData();
+    // 先同步一次数据，将本地数据上传到云端
+    syncDataToServer();
     // 监控页面活跃状态
     monitorPageVisible();
   });
