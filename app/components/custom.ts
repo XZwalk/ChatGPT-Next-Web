@@ -84,9 +84,7 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
 
     getAllChatData((allData) => {
       if (allData && allData.state) {
-        showLoading('检测到更换设备登录，需要把服务器数据覆盖到本地，正在执行数据覆盖操作，请勿刷新页面或者进行其他操作......');
-
-        window.setTimeout(() => {
+        loadingWithDesc('检测到更换设备登录，需要把服务器数据覆盖到本地，正在执行数据覆盖操作，请勿刷新页面或者进行其他操作', 10, () => {
           // 这里不能直接写入，页面节点加载较慢，可能数据写入成功以后又被覆盖掉了，所以得等页面加载完成以后再写入数据，防止数据被覆盖掉
           localStorage.setItem('chat-next-web-store', JSON.stringify(allData));
           zxlog(`写入数据到 chat-next-web-store`);
@@ -94,7 +92,7 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
             showLoading('数据替换完成，准备刷新页面，请稍候......');
             location.reload();
           }, 1000);
-        }, 10000);
+        });
         return;
       }
 
@@ -133,7 +131,7 @@ beigin();
 
 
 /************************ loading ************************/
-function showLoading(descStr : any) {
+function showLoading(descStr: any) {
   if (!document.getElementById('div_pop')) {
     const popDom = document.createElement('div');
     popDom.innerHTML = `
@@ -148,6 +146,22 @@ function showLoading(descStr : any) {
   }
   document.getElementById('content')!.innerHTML = descStr;
 }
+
+
+function loadingWithDesc(descStr: string, time: number, completeBlock: () => void) {
+  let index = time;
+  const timeRepeat = window.setInterval(() => {
+    if (index <= 0) {
+      window.clearInterval(timeRepeat);
+      completeBlock();
+      return;
+    }
+
+    showLoading(`${descStr} ${index}s ......`);
+    index--;
+  }, 1000);
+}
+
 
 // function hideLoading() {
 //   const popDom = document.getElementById('div_pop');
