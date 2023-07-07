@@ -54,7 +54,7 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
   deviceLogin((deviceInfo) => {
     if (!deviceInfo) {
       // 获取信息失败，登录失败，404
-      console.log(`登录失败`);
+      zxlog(`登录失败，弹出登录窗口，准备登录`);
       showLoginPop();
       return;
     }
@@ -135,7 +135,6 @@ function getCookie() {
 }
 
 function showLoginPop() {
-
   if (!document.getElementById('div_pop')) {
     const popDom = document.createElement('div');
     popDom.innerHTML = `
@@ -190,7 +189,7 @@ function deviceLogin(completeBlock: (arg0: any) => void) {
   const indexUrl = `${getApiDomain()}/ChatGPT/login?userName=${loginInfo.userName}&token=${loginInfo.token}&deviceToken=${getDeviceToken()}`;
   fetch(indexUrl, { method: 'GET' }).then(res => res.json()).then(function (result) {
     if (result.code !== 200) {
-      console.log(result.msg);
+      console.log(`/ChatGPT/login：${result.msg}`);
       completeBlock(null);
       return;
     }
@@ -207,7 +206,7 @@ function getAllChatData(completeBlock: (arg0: any) => void) {
   const indexUrl = `${getApiDomain()}/ChatGPT/allData?userName=${loginInfo.userName}&token=${loginInfo.token}`;
   fetch(indexUrl, { method: 'GET' }).then(res => res.json()).then(function (result) {
     if (result.code !== 200) {
-      console.log(result.msg);
+      console.log(`/ChatGPT/allData：${result.msg}`);
       return;
     }
     console.log(result);
@@ -230,7 +229,7 @@ function syncData(store: any, completeBlock: (arg0: any) => void) {
     })
   }).then(res => res.json()).then(result => {
     if (result.code !== 200) {
-      console.log(result.msg);
+      console.log(`/ChatGPT/sync：${result.msg}`);
       return;
     }
     console.log(`数据上传到服务器成功`);
