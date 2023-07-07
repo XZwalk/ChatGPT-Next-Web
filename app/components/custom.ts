@@ -361,7 +361,16 @@ function monitorPageVisible() {
         if (autoSyncTimeRepeat) {
           zxlog("检测到autoSyncTimeRepeat对象已存在，不执行开启逻辑");
         } else {
-          autoSyncData();
+          // 从后台回来先检查设备是否更换，再进行操作，确保用户切到前台的时候进行提问，但是设备已更换，导致数据丢失
+          checkServerCurrentDeviceToken((isSuccess) => {
+            if (isSuccess) {
+              // 未更换设备，开启自动同步
+              autoSyncData();
+            } else {
+              // 设备已更换，停止数据同步
+              stopSyncData();
+            }
+          });
         }
       }
     });
