@@ -113,7 +113,7 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
         // }
 
         window.setTimeout(() => {
-          location.reload();
+          location.href = `https://chatgpt.xiangzi.site`;
         }, 1000);
         return;
       }
