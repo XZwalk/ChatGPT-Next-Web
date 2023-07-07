@@ -19,56 +19,66 @@
 export { };
 
 function beigin() {
-
-
   zxlog(`开始 获取云端数据`);
-  fetchIDsData((ids) => {
-    const sessions = getSessionsWithIds(ids);
-    syncData(ids, sessions, (dataAry) => {
-      mergeData(dataAry);
-      zxlog(`syncData done`);
-    });
+
+  loginMyServer(() => {
+    autoSyncData();
   });
 }
 
-function mergeData(dataAry: any) {
-  if (dataAry.length === 0) {
-    return;
-  }
 
-  const jsonData = getLocalStoreData();
-  if (!jsonData || !jsonData.state || !jsonData.state.sessions) {
-    return;
-  }
-
-  const sessions = jsonData.state.sessions;
-
-  for (let i = 0; i < dataAry.length; i++) {
-    // 服务器返回数据
-    const serverItem = dataAry[i];
-    let sameIndex = -1;
-    for (let j = 0; j < sessions.length; j++) {
-      // 本地数据
-      const webItem = sessions[j];
-      if (webItem.id === serverItem.id) {
-        sameIndex = j;
-        break;
-      }
+let nowServerDataStr: any = null;
+function autoSyncData() {
+  window.setInterval(() => {
+    zxlog(`准备同步数据`);
+    const nowDataStr = localStorage.getItem('chat-next-web-store');
+    if (nowServerDataStr === nowDataStr) {
+      zxlog(`${new Date()} 服务器数据与本地数据一致，不上传数据`);
+      return;
     }
 
-    if (sameIndex >= 0) {
-      // 更新数据
-      sessions[sameIndex] = serverItem;
-    } else {
-      // 新增数据
-      sessions.push(serverItem);
-    }
-  }
-
-  localStorage.setItem('chat-next-web-store', JSON.stringify(jsonData));
-  location.reload();
+    syncData(getLocalStoreData(), () => {
+      nowServerDataStr = nowDataStr;
+    });
+  }, 2 * 1000);
 }
 
+function loginMyServer(completeBlock: (arg0: any) => void) {
+  deviceLogin((deviceInfo) => {
+
+    if (!deviceInfo) {
+      // 获取信息失败，登录失败，404
+      console.log(`登录失败`);
+      return;
+    }
+
+    try {
+      const access_control = JSON.parse(localStorage.getItem('access-control') || '{}');
+      access_control.state.accessCode = deviceInfo.accessCode;
+      localStorage.setItem('access-control', JSON.stringify(access_control));
+      zxlog(`写入 access-control`);
+    } catch (error) {
+      console.log(error);
+    }
+
+    if (!deviceInfo.isChangeDevice) {
+      zxlog(`设备信息未改变`);
+      completeBlock(true);
+      return;
+    }
+
+    getAllChatData((allData) => {
+      if (allData && allData.state) {
+        localStorage.setItem('chat-next-web-store', JSON.stringify(allData));
+        location.reload();
+        return;
+      }
+
+      zxlog(`获取全量数据异常`);
+      completeBlock(true);
+    });
+  });
+}
 
 function getLocalStoreData() {
   const localDataStr = localStorage.getItem('chat-next-web-store');
@@ -80,30 +90,19 @@ function getLocalStoreData() {
   }
 }
 
-
-function getSessionsWithIds(ids: any) {
-  const jsonData = getLocalStoreData();
-  if (jsonData && jsonData.state && jsonData.state.sessions) {
-    const resultAry = [];
-    const sessions = jsonData.state.sessions;
-    for (let index = 0; index < sessions.length; index++) {
-      const element = sessions[index];
-      const idInfo = ids[element.id] || {};
-      if (idInfo.lastUpdate !== element.lastUpdate) {
-        resultAry.push(element);
-      }
-
-      idInfo.lastUpdate = element.lastUpdate;
-      ids[element.id] = idInfo;
-    }
-
-    return resultAry;
+function getDeviceToken() {
+  let deviceToken = null;
+  if (typeof localStorage !== 'undefined') {
+    deviceToken = localStorage.getItem('deviceToken');
   }
-
-  return [];
+  if (!deviceToken) {
+    deviceToken = `${new Date().getTime()}`;
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('deviceToken', deviceToken);
+    }
+  }
+  return deviceToken;
 }
-
-
 
 
 beigin();
@@ -127,11 +126,11 @@ function getApiDomain() {
   return `http://localhost:9007`;
 }
 
-// 从云端获取候选人数据，云端不存在则创建一条数据
-function fetchIDsData(completeBlock: (arg0: any) => void) {
-  console.log(`fetchIDsData`);
+
+function deviceLogin(completeBlock: (arg0: any) => void) {
+  console.log(`deviceLogin`);
   const loginInfo = getCookie();
-  const indexUrl = `${getApiDomain()}/ChatGPT/ids?userName=${loginInfo.userName}&token=${loginInfo.token}`;
+  const indexUrl = `${getApiDomain()}/ChatGPT/login?userName=${loginInfo.userName}&token=${loginInfo.token}&deviceToken=${getDeviceToken()}`;
   fetch(indexUrl, { method: 'GET' }).then(res => res.json()).then(function (result) {
     if (result.code !== 200) {
       console.log(result.msg);
@@ -143,7 +142,23 @@ function fetchIDsData(completeBlock: (arg0: any) => void) {
 };
 
 
-function syncData(ids: any, sessions: any, completeBlock: (arg0: any) => void) {
+// 从云端获取候选人数据，云端不存在则创建一条数据
+function getAllChatData(completeBlock: (arg0: any) => void) {
+  console.log(`getAllChatData`);
+  const loginInfo = getCookie();
+  const indexUrl = `${getApiDomain()}/ChatGPT/allData?userName=${loginInfo.userName}&token=${loginInfo.token}`;
+  fetch(indexUrl, { method: 'GET' }).then(res => res.json()).then(function (result) {
+    if (result.code !== 200) {
+      console.log(result.msg);
+      return;
+    }
+    console.log(result);
+    completeBlock(result.data);
+  });
+};
+
+
+function syncData(store: any, completeBlock: (arg0: any) => void) {
   const loginInfo = getCookie();
   fetch(`${getApiDomain()}/ChatGPT/sync`, {
     headers: {
@@ -153,15 +168,14 @@ function syncData(ids: any, sessions: any, completeBlock: (arg0: any) => void) {
     body: JSON.stringify({
       userName: loginInfo.userName,
       token: loginInfo.token,
-      ids: ids,
-      sessions: sessions
+      store: store
     })
   }).then(res => res.json()).then(result => {
     if (result.code !== 200) {
       console.log(result.msg);
       return;
     }
-    console.log(`数据创建成功`);
+    console.log(`数据上传成功`);
     console.log(result);
     completeBlock(result.data);
   });
