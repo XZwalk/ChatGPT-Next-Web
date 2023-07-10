@@ -86,32 +86,6 @@ function stopSyncData() {
 }
 
 
-function updateAccessControl(deviceInfo: any) {
-  const access_control = JSON.parse(localStorage.getItem('access-control') || '{}');
-  let isNeedReload = false;
-  if (!access_control.state.accessCode || !access_control.state.token) {
-    // 首次登录，需要刷新页面
-    isNeedReload = true;
-  }
-
-  // 授权码
-  access_control.state.accessCode = deviceInfo.accessCode || '';
-  // openai的key
-  access_control.state.token = deviceInfo.apiKey || '';
-  localStorage.setItem('access-control', JSON.stringify(access_control));
-  zxlog(`写入 access-control`);
-
-  if (!isNeedReload) {
-    return;
-  }
-
-  loadingWithDesc('检测到首次登录设备，需要刷新页面，请稍候', 5, () => {
-    localStorage.setItem('access-control', JSON.stringify(access_control));
-    location.reload();
-  });
-}
-
-
 function loginMyServer(completeBlock: (arg0: any) => void) {
   zxlog(`登录服务器......`);
   deviceLogin((deviceInfo) => {
@@ -122,7 +96,25 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
       return;
     }
 
-    updateAccessControl(deviceInfo);
+    const access_control = JSON.parse(localStorage.getItem('access-control') || '{}');
+    let isFirstLogin = false;
+    if (!access_control.state.accessCode && !access_control.state.token) {
+      // 首次登录，需要刷新页面
+      isFirstLogin = true;
+    }
+    // 授权码
+    access_control.state.accessCode = deviceInfo.accessCode || '';
+    // openai的key
+    access_control.state.token = deviceInfo.apiKey || '';
+    localStorage.setItem('access-control', JSON.stringify(access_control));
+    zxlog(`写入 access-control`);
+    if (isFirstLogin) {
+      loadingWithDesc('检测到首次登录设备，需要刷新页面，请稍候', 5, () => {
+        localStorage.setItem('access-control', JSON.stringify(access_control));
+        location.reload();
+      });
+      return;
+    }
 
     if (!deviceInfo.isChangeDevice) {
       zxlog(`本次登录，设备信息未改变，不覆盖本机数据`);
