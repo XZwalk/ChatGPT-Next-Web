@@ -19,8 +19,11 @@
 export { };
 
 // 定义常量
+// 当前服务器上的数据
 let nowServerDataStr: any = null;
+// 轮询检查的时间间隔
 let timeInterval: number = 2;
+// 自动同步数据的定时器对象
 let autoSyncTimeRepeat: any = null;
 // 是否展示设备更换的提示弹窗
 let alertChangeDeviceShown: boolean = false;
@@ -109,7 +112,7 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
     localStorage.setItem('access-control', JSON.stringify(access_control));
     zxlog(`写入 access-control`);
     if (isFirstLogin) {
-      loadingWithDesc('检测到首次登录设备，需要刷新页面，请稍候', 5, () => {
+      loadingWithDesc('检测到首次登录设备，正在下发服务器token和openai keys，需要刷新页面，请稍候', 5, () => {
         localStorage.setItem('access-control', JSON.stringify(access_control));
         location.reload();
       });
