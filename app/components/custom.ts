@@ -79,13 +79,14 @@ function stopSyncData() {
     zxlog(`当前已展示停止更新数据弹窗，此次不展示`);
     return;
   }
-  alertChangeDeviceShown = true;
   zxlog(`!!!数据同步已停止!!!`);
   window.clearInterval(autoSyncTimeRepeat);
   autoSyncTimeRepeat = null;
-  alert(`检测到在其他设备登录，点击确定按钮，立马刷新页面，在当前设备登录`);
-  alertChangeDeviceShown = false;
-  location.reload();
+  alertChangeDeviceShown = true;
+  showAlert(`登录`, `检测到在其他设备登录，点击确定按钮，立马刷新页面，在当前设备登录`, () => {
+    alertChangeDeviceShown = false;
+    location.reload();
+  });
 }
 
 
@@ -262,7 +263,7 @@ function showLoginPop() {
     const userName = userNameInput.value;
     const token = tokenInput.value;
     if (!userName || !token) {
-      window.alert(`输入内容不能为空`);
+      showAlert('登录', `输入内容不能为空`, null);
       return;
     }
 
@@ -403,7 +404,7 @@ function monitorPageVisible() {
 
 
 /************************ alert ************************/
-function showAlert(title: any, desc: any, completeBlock: () => void) {
+function showAlert(title: any, desc: any, completeBlock : any) {
   let myAlert = document.getElementById('myModal');
   if (!myAlert) {
     myAlert = document.createElement('div');
