@@ -127,14 +127,16 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
 
     getAllChatData((allData) => {
       if (allData && allData.state) {
-        loadingWithDesc('检测到更换设备登录，需要把服务器数据覆盖到本地，正在执行数据覆盖操作，请勿刷新页面或者进行其他操作', 10, () => {
-          // 这里不能直接写入，页面节点加载较慢，可能数据写入成功以后又被覆盖掉了，所以得等页面加载完成以后再写入数据，防止数据被覆盖掉
-          localStorage.setItem('chat-next-web-store', JSON.stringify(allData));
-          zxlog(`写入数据到 chat-next-web-store`);
-          setTimeout(() => {
-            showLoading('数据替换完成，准备刷新页面，请稍候......');
-            location.reload();
-          }, 1000);
+        showAlert('设备登录', `检测到当前账号已在其他设备登录，点击确认，其他设备将下线。`, () => {
+          loadingWithDesc('检测到更换设备登录，需要把服务器数据覆盖到本地，正在执行数据覆盖操作，请勿刷新页面或者进行其他操作', 10, () => {
+            // 这里不能直接写入，页面节点加载较慢，可能数据写入成功以后又被覆盖掉了，所以得等页面加载完成以后再写入数据，防止数据被覆盖掉
+            localStorage.setItem('chat-next-web-store', JSON.stringify(allData));
+            zxlog(`写入数据到 chat-next-web-store`);
+            setTimeout(() => {
+              showLoading('数据替换完成，准备刷新页面，请稍候......');
+              location.reload();
+            }, 1000);
+          });
         });
         return;
       }
@@ -400,6 +402,78 @@ function monitorPageVisible() {
 }
 
 
+/************************ alert ************************/
+function showAlert(title: any, desc: any, completeBlock: () => void) {
+  let myAlert = document.getElementById('myModal');
+  if (!myAlert) {
+    myAlert = document.createElement('div');
+    myAlert.innerHTML = `
+    <style>
+    .modal-content {
+      background-color: #fefefe;
+      margin: 10% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 400px;
+      border-radius: 5px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      text-align: center;
+    }
+
+    .modal-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .modal-description {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+
+    .modal-button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 3px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    </style>
+    <div class="modal-content">
+      <div class="modal-title">${title}</div>
+      <div class="modal-description">${desc}</div>
+      <button id="modalButton" class="modal-button">确认</button>
+    </div>
+    `;
+    myAlert.id = 'myModal';
+    myAlert.style.cssText = `
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    overflow: auto;
+    `;
+    document.body.appendChild(myAlert);
+  }
+
+  document.getElementById('modalButton')!.onclick = function () {
+    // 将弹窗移出
+    if (myAlert) {
+      myAlert.parentNode!.removeChild(myAlert);
+    }
+
+    if (completeBlock) {
+      completeBlock();
+    }
+  };
+}
 /************************ public ************************/
 function zxlog(logStr: string) {
   console.log(`%c${logStr}`, "color: blue; font-weight: bold;");
