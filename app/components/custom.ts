@@ -83,7 +83,7 @@ function stopSyncData() {
   window.clearInterval(autoSyncTimeRepeat);
   autoSyncTimeRepeat = null;
   alertChangeDeviceShown = true;
-  showAlert(`登录下线提醒`, `检测到在其他设备登录，本设备已离线，点击确认按钮，立马刷新页面，在当前设备登录，否则请关闭当前页面！`, () => {
+  showAlert(`登录下线提醒`, `检测到在其他设备登录，本设备已离线，点击按钮，立马在当前设备登录，否则请关闭当前页面！`, '登录当前设备', () => {
     alertChangeDeviceShown = false;
     location.reload();
   });
@@ -93,7 +93,7 @@ function stopSyncData() {
 function requestAllDataOnline(completeBlock: (arg0: any) => void) {
   getAllChatData((allData) => {
     if (allData && allData.state) {
-      showAlert('数据同步提醒', `已在当前设备登录成功，其他设备已下线，点击确认，远端数据将覆盖本地数据。`, () => {
+      showAlert('数据同步提醒', `已在当前设备登录成功，其他设备已下线，点击按钮，远端数据将覆盖本地数据。`, '覆盖本地数据', () => {
         loadingWithDesc('检测到更换设备登录，需要把服务器数据覆盖到本地，正在执行数据覆盖操作，请勿刷新页面或者进行其他操作', 10, () => {
           // 这里不能直接写入，页面节点加载较慢，可能数据写入成功以后又被覆盖掉了，所以得等页面加载完成以后再写入数据，防止数据被覆盖掉
           localStorage.setItem('chat-next-web-store', JSON.stringify(allData));
@@ -271,7 +271,7 @@ function showLoginPop() {
     const userName = userNameInput.value;
     const token = tokenInput.value;
     if (!userName || !token) {
-      showAlert('登录', `输入内容不能为空`, null);
+      showAlert('登录', `输入内容不能为空`, null, null);
       return;
     }
 
@@ -413,7 +413,7 @@ function monitorPageVisible() {
 
 
 /************************ alert ************************/
-function showAlert(title: any, desc: any, completeBlock: any) {
+function showAlert(title: any, desc: any, btnTitle: any, completeBlock: any) {
   let myAlert = document.getElementById('myModal');
   if (!myAlert) {
     myAlert = document.createElement('div');
@@ -455,7 +455,7 @@ function showAlert(title: any, desc: any, completeBlock: any) {
     <div class="modal-content">
       <div class="modal-title">${title}</div>
       <div class="modal-description">${desc}</div>
-      <button id="modalButton" class="modal-button">确认</button>
+      <button id="modalButton" class="modal-button">${btnTitle || '确认'}</button>
     </div>
     `;
     myAlert.id = 'myModal';
