@@ -443,7 +443,7 @@ function showAlert(title: any, desc: any, btnTitle: any, completeBlock: any) {
     }
 
     .modal-button {
-      background-color: ${btnTitle ? '#4CAF50' : '#fefefe'};
+      background-color: ${btnTitle ? '#fe5d4e' : '#4CAF50'};
       color: white;
       padding: 10px 20px;
       border: none;
