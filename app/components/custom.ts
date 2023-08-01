@@ -420,7 +420,7 @@ function showAlert(title: any, desc: any, btnTitle: any, completeBlock: any) {
     myAlert.innerHTML = `
     <style>
     .modal-content {
-      background-color: ${btnTitle ? '#fe5d4e' : '#fefefe'};
+      background-color: #fe5d4e;
       margin: 10% auto;
       padding: 20px;
       border: 1px solid #888;
@@ -443,7 +443,7 @@ function showAlert(title: any, desc: any, btnTitle: any, completeBlock: any) {
     }
 
     .modal-button {
-      background-color: #4CAF50;
+      background-color: ${btnTitle ? '#4CAF50' : '#fefefe'};
       color: white;
       padding: 10px 20px;
       border: none;
