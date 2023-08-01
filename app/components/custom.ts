@@ -372,6 +372,7 @@ function syncData(store: any, completeBlock: (arg0: any) => void) {
       return;
     }
     zxlog(`数据上传到服务器成功`);
+    console.log(store);
     console.log(result);
     completeBlock(result.data);
   });
