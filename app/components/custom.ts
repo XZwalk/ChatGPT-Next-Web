@@ -90,6 +90,29 @@ function stopSyncData() {
 }
 
 
+function requestAllDataOnline(completeBlock: (arg0: any) => void) {
+  getAllChatData((allData) => {
+    if (allData && allData.state) {
+      showAlert('数据同步提醒', `已在当前设备登录成功，其他设备已下线，点击确认，远端数据将覆盖本地数据。`, () => {
+        loadingWithDesc('检测到更换设备登录，需要把服务器数据覆盖到本地，正在执行数据覆盖操作，请勿刷新页面或者进行其他操作', 10, () => {
+          // 这里不能直接写入，页面节点加载较慢，可能数据写入成功以后又被覆盖掉了，所以得等页面加载完成以后再写入数据，防止数据被覆盖掉
+          localStorage.setItem('chat-next-web-store', JSON.stringify(allData));
+          zxlog(`写入数据到 chat-next-web-store`);
+          setTimeout(() => {
+            showLoading('数据替换完成，准备刷新页面，请稍候......');
+            location.reload();
+          }, 1000);
+        });
+      });
+      return;
+    }
+
+    zxlog(`获取全量数据异常，有可能为首次登录，服务器无数据，不覆盖本机数据`);
+    completeBlock(true);
+  });
+}
+
+
 function loginMyServer(completeBlock: (arg0: any) => void) {
   zxlog(`登录服务器......`);
   deviceLogin((deviceInfo) => {
@@ -115,7 +138,10 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
     if (isFirstLogin) {
       loadingWithDesc('检测到首次登录设备，正在下发服务器token和openai keys，需要刷新页面，请稍候', 5, () => {
         localStorage.setItem('access-control', JSON.stringify(access_control));
-        location.reload();
+        // location.reload();
+        hideLoading();
+        // 首次登录，相当于更换设备，需要使用远端数据覆盖
+        requestAllDataOnline(completeBlock);
       });
       return;
     }
@@ -126,25 +152,7 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
       return;
     }
 
-    getAllChatData((allData) => {
-      if (allData && allData.state) {
-        showAlert('数据同步提醒', `已在当前设备登录成功，其他设备已下线，点击确认，远端数据将覆盖本地数据。`, () => {
-          loadingWithDesc('检测到更换设备登录，需要把服务器数据覆盖到本地，正在执行数据覆盖操作，请勿刷新页面或者进行其他操作', 10, () => {
-            // 这里不能直接写入，页面节点加载较慢，可能数据写入成功以后又被覆盖掉了，所以得等页面加载完成以后再写入数据，防止数据被覆盖掉
-            localStorage.setItem('chat-next-web-store', JSON.stringify(allData));
-            zxlog(`写入数据到 chat-next-web-store`);
-            setTimeout(() => {
-              showLoading('数据替换完成，准备刷新页面，请稍候......');
-              location.reload();
-            }, 1000);
-          });
-        });
-        return;
-      }
-
-      zxlog(`获取全量数据异常，有可能为首次登录，服务器无数据，不覆盖本机数据`);
-      completeBlock(true);
-    });
+    requestAllDataOnline(completeBlock);
   });
 }
 
@@ -209,12 +217,12 @@ function loadingWithDesc(descStr: string, time: number, completeBlock: () => voi
 }
 
 
-// function hideLoading() {
-//   const popDom = document.getElementById('div_pop');
-//   if (popDom) {
-//     popDom.parentNode!.removeChild(popDom);
-//   }
-// }
+function hideLoading() {
+  const popDom = document.getElementById('div_pop');
+  if (popDom) {
+    popDom.parentNode!.removeChild(popDom);
+  }
+}
 
 /************************ 登录操作 ************************/
 function getCookie() {
@@ -404,7 +412,7 @@ function monitorPageVisible() {
 
 
 /************************ alert ************************/
-function showAlert(title: any, desc: any, completeBlock : any) {
+function showAlert(title: any, desc: any, completeBlock: any) {
   let myAlert = document.getElementById('myModal');
   if (!myAlert) {
     myAlert = document.createElement('div');
