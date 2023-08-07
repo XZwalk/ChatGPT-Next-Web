@@ -124,18 +124,24 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
     }
 
     const access_control = JSON.parse(localStorage.getItem('access-control') || '{}');
+    // 是否是第一次登录
     let isFirstLogin = false;
+    // 授权码是否发生改变
+    let isAccessChange = false;
     if (!access_control.state.accessCode && !access_control.state.token) {
       // 首次登录，需要刷新页面
       isFirstLogin = true;
     }
     // 授权码
+    isAccessChange = deviceInfo.accessCode !== access_control.state.accessCode;
     access_control.state.accessCode = deviceInfo.accessCode || '';
     // openai的key
+    isAccessChange = deviceInfo.apiKey !== access_control.state.token;
     access_control.state.token = deviceInfo.apiKey || '';
 
-    if (isFirstLogin) {
-      loadingWithDesc('检测到首次登录设备，正在下发服务器token和openai keys，需要刷新页面，请稍候', 5, () => {
+    if (isFirstLogin || isAccessChange) {
+      const tipHeadStr = isFirstLogin ? `检测到首次登录设备` : `检测到授权码发生变化`;
+      loadingWithDesc(`${tipHeadStr}，正在下发服务器token和openai keys，需要刷新页面，请稍候`, 5, () => {
         localStorage.setItem('access-control', JSON.stringify(access_control));
         // location.reload();
         hideLoading();
@@ -146,10 +152,10 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
     }
 
     // 5s后更新授权信息
-    setTimeout(() => {
-      localStorage.setItem('access-control', JSON.stringify(access_control));
-      zxlog(`写入 access-control`);
-    }, 5000);
+    // setTimeout(() => {
+    //   localStorage.setItem('access-control', JSON.stringify(access_control));
+    //   zxlog(`写入 access-control`);
+    // }, 5000);
 
     if (!deviceInfo.isChangeDevice) {
       zxlog(`本次登录，设备信息未改变，不覆盖本机数据`);
