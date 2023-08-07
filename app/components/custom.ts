@@ -133,8 +133,7 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
     access_control.state.accessCode = deviceInfo.accessCode || '';
     // openai的key
     access_control.state.token = deviceInfo.apiKey || '';
-    localStorage.setItem('access-control', JSON.stringify(access_control));
-    zxlog(`写入 access-control`);
+
     if (isFirstLogin) {
       loadingWithDesc('检测到首次登录设备，正在下发服务器token和openai keys，需要刷新页面，请稍候', 5, () => {
         localStorage.setItem('access-control', JSON.stringify(access_control));
@@ -145,6 +144,12 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
       });
       return;
     }
+
+    // 5s后更新授权信息
+    setTimeout(() => {
+      localStorage.setItem('access-control', JSON.stringify(access_control));
+      zxlog(`写入 access-control`);
+    }, 5000);
 
     if (!deviceInfo.isChangeDevice) {
       zxlog(`本次登录，设备信息未改变，不覆盖本机数据`);
