@@ -143,10 +143,15 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
       const tipHeadStr = isFirstLogin ? `检测到首次登录设备` : `检测到授权码发生变化`;
       loadingWithDesc(`${tipHeadStr}，正在下发服务器token和openai keys，需要刷新页面，请稍候`, 5, () => {
         localStorage.setItem('access-control', JSON.stringify(access_control));
-        // location.reload();
         hideLoading();
         // 首次登录，相当于更换设备，需要使用远端数据覆盖
-        requestAllDataOnline(completeBlock);
+        if (isFirstLogin) {
+          requestAllDataOnline(completeBlock);
+          return;
+        }
+
+        // 授权码变化需要刷新页面
+        location.reload();
       });
       return;
     }
