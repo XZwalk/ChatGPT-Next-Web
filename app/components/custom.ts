@@ -87,7 +87,7 @@ function stopSyncData() {
   window.clearInterval(autoSyncTimeRepeat);
   autoSyncTimeRepeat = null;
   alertChangeDeviceShown = true;
-  showAlert(`登录下线提醒`, `检测到在其他设备登录，本设备已离线，点击按钮，立马在当前设备登录，否则请关闭当前页面！`, '登录当前设备', () => {
+  showAlert(`登录下线提醒`, `检测到在其他设备登录，本设备已离线，点击按钮，立马在当前设备登录，否则请关闭当前页面！`, '登录当前设备', false, () => {
     alertChangeDeviceShown = false;
     location.reload();
   });
@@ -97,7 +97,7 @@ function stopSyncData() {
 function requestAllDataOnline(completeBlock: (arg0: any) => void) {
   getAllChatData((allData) => {
     if (allData && allData.state) {
-      showAlert('数据同步提醒', `已在当前设备登录成功，其他设备已下线，点击按钮，远端数据将覆盖本地数据。`, '覆盖本地数据', () => {
+      showAlert('数据同步提醒', `已在当前设备登录成功，其他设备已下线，点击按钮，远端数据将覆盖本地数据。`, '覆盖本地数据', false, () => {
         loadingWithDesc('检测到更换设备登录，需要把服务器数据覆盖到本地，正在执行数据覆盖操作，请勿刷新页面或者进行其他操作', 10, () => {
           // 这里不能直接写入，页面节点加载较慢，可能数据写入成功以后又被覆盖掉了，所以得等页面加载完成以后再写入数据，防止数据被覆盖掉
           localStorage.setItem('chat-next-web-store', JSON.stringify(allData));
@@ -293,7 +293,7 @@ function showLoginPop() {
     const userName = userNameInput.value;
     const token = tokenInput.value;
     if (!userName || !token) {
-      showAlert('登录', `输入内容不能为空`, null, null);
+      showAlert('登录', `输入内容不能为空`, null, false, null);
       return;
     }
 
@@ -487,7 +487,7 @@ function addCurrentLoginInfo() {
   headDom!.parentNode!.insertBefore(loginDom, headDom);
 
   document.getElementById('button_logout')!.onclick = function () {
-    showAlert(`退出登录提醒`, `退出登录后本地数据会全部清除，确定退出吗？`, '退出登录', () => {
+    showAlert(`退出登录提醒`, `退出登录后本地数据会全部清除，确定退出吗？`, '退出登录', true, () => {
       stopSyncData();
       // 清除当前登录信息
       localStorage.removeItem('myCookie');
@@ -502,8 +502,9 @@ function addCurrentLoginInfo() {
 
 
 /************************ alert ************************/
-function showAlert(title: any, desc: any, btnTitle: any, completeBlock: any) {
+function showAlert(title: any, desc: any, btnTitle: any, isNeedCancel: boolean, completeBlock: any) {
   let myAlert = document.getElementById('myModal');
+  const cancelBtnStr = isNeedCancel ? `<button id="cancelButton" class="modal-button" style="background-color: green;">取消</button>` : '';
   if (!myAlert) {
     myAlert = document.createElement('div');
     myAlert.innerHTML = `
@@ -531,6 +532,11 @@ function showAlert(title: any, desc: any, btnTitle: any, completeBlock: any) {
       margin-bottom: 20px;
     }
 
+    .modal-btn-content {
+      justify-content: space-around;
+      display: flex;
+    }
+
     .modal-button {
       background-color: ${btnTitle ? '#fe5d4e' : '#4CAF50'};
       color: white;
@@ -544,7 +550,10 @@ function showAlert(title: any, desc: any, btnTitle: any, completeBlock: any) {
     <div class="modal-content">
       <div class="modal-title">${title}</div>
       <div class="modal-description">${desc}</div>
-      <button id="modalButton" class="modal-button">${btnTitle || '确认'}</button>
+      <div class="modal-btn-content">
+        ${cancelBtnStr}
+        <button id="modalButton" class="modal-button">${btnTitle || '确认'}</button>
+      </div>
     </div>
     `;
     myAlert.id = 'myModal';
@@ -572,6 +581,16 @@ function showAlert(title: any, desc: any, btnTitle: any, completeBlock: any) {
       completeBlock();
     }
   };
+
+  if (isNeedCancel) {
+    document.getElementById('cancelButton')!.onclick = function () {
+      // 将弹窗移出
+      if (myAlert) {
+        myAlert.parentNode!.removeChild(myAlert);
+      }
+    };
+  }
+
 }
 /************************ public ************************/
 function zxlog(logStr: string) {
