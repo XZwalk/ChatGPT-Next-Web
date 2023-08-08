@@ -39,6 +39,8 @@ function beigin() {
     syncDataToServer();
     // 监控页面活跃状态
     monitorPageVisible();
+    // 展示登录信息
+    addCurrentLoginInfo();
   });
 }
 
@@ -150,6 +152,7 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
           return;
         }
 
+        // 以下逻辑为授权码发生变化的处理逻辑
         // 授权码变化，设备未发生变化，只刷新页面即可
         if (!deviceInfo.isChangeDevice) {
           zxlog(`本次登录，设备信息未改变，不覆盖本机数据`);
@@ -426,6 +429,52 @@ function monitorPageVisible() {
       }
     });
   }, 5000);
+}
+
+
+/************************ 登录信息展示 ************************/
+function addCurrentLoginInfo() {
+  const myCookie = localStorage.getItem('myCookie');
+  if (!myCookie) {
+    return;
+  }
+
+  setTimeout(() => {
+    if (document.getElementById('div_login_info')) {
+      return;
+    }
+
+    const myCookieJsonData = JSON.parse(myCookie);
+    const userName = myCookieJsonData.userName;
+    // 创建要插入的新元素
+    const loginDom = document.createElement('div');
+    loginDom.id = 'div_login_info';
+    loginDom.style.cssText = `
+    display: flex;
+    justify-content: space-between;
+    `;
+    loginDom.innerHTML = `
+    ${userName}
+    <button id="button_logout">退出登录</button>
+    `;
+    // home_sidebar-header___NHg_
+    const headDom = document.querySelector('.home_sidebar-header___NHg_');
+    // 在目标元素之前插入新元素
+    headDom!.parentNode!.insertBefore(loginDom, headDom);
+
+    document.getElementById('button_logout')!.onclick = function () {
+      showAlert(`退出登录提醒`, `退出登录后本地数据会全部清除，确定退出吗？`, '退出登录', () => {
+        stopSyncData();
+        // 清除当前登录信息
+        localStorage.removeItem('myCookie');
+        localStorage.removeItem('access-control');
+        localStorage.removeItem('chat-next-web-store');
+        location.reload();
+      });
+    };
+
+    zxlog(`注入登录信息展示dom`);
+  }, 6000);
 }
 
 
