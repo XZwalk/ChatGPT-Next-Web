@@ -150,17 +150,18 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
           return;
         }
 
-        // 授权码变化需要刷新页面
-        location.reload();
+        // 授权码变化，设备未发生变化，只刷新页面即可
+        if (!deviceInfo.isChangeDevice) {
+          zxlog(`本次登录，设备信息未改变，不覆盖本机数据`);
+          location.reload();
+          return;
+        }
+
+        // 授权码变化，设备也发生变化，则需要远程覆盖本地数据
+        requestAllDataOnline(completeBlock);
       });
       return;
     }
-
-    // 5s后更新授权信息
-    // setTimeout(() => {
-    //   localStorage.setItem('access-control', JSON.stringify(access_control));
-    //   zxlog(`写入 access-control`);
-    // }, 5000);
 
     if (!deviceInfo.isChangeDevice) {
       zxlog(`本次登录，设备信息未改变，不覆盖本机数据`);
