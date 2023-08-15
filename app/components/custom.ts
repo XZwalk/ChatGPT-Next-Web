@@ -479,7 +479,7 @@ function addCurrentLoginInfo() {
   `;
   loginDom.innerHTML = `
   ${userName}
-  <button id="button_logout">退出登录</button>
+  <button id="button_logout" class="button_icon-button__VwAMf">退出登录</button>
   `;
   // home_sidebar-header___NHg_
   const headDom = document.querySelector('.home_sidebar-header___NHg_');
