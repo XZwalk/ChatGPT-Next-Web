@@ -280,8 +280,8 @@ function showLoginPop() {
           <input id="input_userName" type="text" style="width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 5px;">
         </div>
         <div style="margin-bottom: 10px;">
-          <label for="input_token" style="display: block; margin-bottom: 5px;">Token</label>
-          <input id="input_token" type="text" style="width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 5px;">
+          <label for="input_pwd" style="display: block; margin-bottom: 5px;">密码</label>
+          <input id="input_pwd" type="text" style="width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 5px;">
         </div>
         <button id="button_login" style="margin-top: 20px; padding: 10px 20px; background-color: #4CAF50; color: #fff; border: none; border-radius: 5px; cursor: pointer;">登录</button>
       </div>
@@ -292,7 +292,7 @@ function showLoginPop() {
 
   document.getElementById('button_login')!.onclick = function () {
     const userNameInput = document.getElementById('input_userName') as HTMLInputElement;
-    const tokenInput = document.getElementById('input_token') as HTMLInputElement;
+    const tokenInput = document.getElementById('input_pwd') as HTMLInputElement;
     const userName = userNameInput.value;
     const token = tokenInput.value;
     if (!userName || !token) {
