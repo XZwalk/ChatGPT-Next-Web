@@ -130,18 +130,21 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
     const access_control = JSON.parse(localStorage.getItem('access-control') || '{}');
     // 是否是第一次登录
     let isFirstLogin = false;
-    // 授权码是否发生改变
+    // 授权是否发生改变
     let isAccessChange = false;
     if (!access_control.state.accessCode && !access_control.state.token) {
       // 首次登录，需要刷新页面
       isFirstLogin = true;
     }
-    // 授权码
+    // 授权码(根据官方指导，发布网站的时候设置的访问密码，不设置也是可以的)
     isAccessChange = deviceInfo.accessCode !== access_control.state.accessCode;
     access_control.state.accessCode = deviceInfo.accessCode || '';
     // openai的key
     isAccessChange = deviceInfo.apiKey !== access_control.state.token;
     access_control.state.token = deviceInfo.apiKey || '';
+    // openai的代理url
+    isAccessChange = deviceInfo.apiUrl !== access_control.state.openaiUrl;
+    access_control.state.openaiUrl = deviceInfo.apiUrl || '/api/openai/';
 
     if (isFirstLogin || isAccessChange) {
       const tipHeadStr = isFirstLogin ? `检测到首次登录设备` : `检测到授权码发生变化`;
