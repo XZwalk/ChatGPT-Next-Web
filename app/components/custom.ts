@@ -138,13 +138,13 @@ function loginMyServer(completeBlock: (arg0: any) => void) {
     }
     // 授权码(根据官方指导，发布网站的时候设置的访问密码，不设置也是可以的)
     isAccessChange = deviceInfo.accessCode !== access_control.state.accessCode;
-    access_control.state.accessCode = deviceInfo.accessCode || '';
+    access_control.state.accessCode = deviceInfo.accessCode;
     // openai的key
     isAccessChange = deviceInfo.apiKey !== access_control.state.token;
-    access_control.state.token = deviceInfo.apiKey || '';
+    access_control.state.token = deviceInfo.apiKey;
     // openai的代理url
     isAccessChange = deviceInfo.apiUrl !== access_control.state.openaiUrl;
-    access_control.state.openaiUrl = deviceInfo.apiUrl || '/api/openai/';
+    access_control.state.openaiUrl = deviceInfo.apiUrl;
 
     if (isFirstLogin || isAccessChange) {
       const tipHeadStr = isFirstLogin ? `检测到首次登录设备` : `检测到授权码发生变化`;
