@@ -43,6 +43,8 @@ function beigin() {
     addCurrentLoginInfo();
     // 调整界面布局
     adjustPageUI();
+    // 更新消耗tokens数据
+    startUpdateTokensUsed();
   });
 }
 
@@ -76,6 +78,9 @@ function autoSyncData() {
   autoSyncTimeRepeat = window.setInterval(() => {
     syncDataToServer();
   }, timeInterval * 60 * 1000);
+
+  // 开启余额数据请求
+  startUpdateTokensUsed();
 }
 
 function stopSyncData() {
@@ -91,6 +96,9 @@ function stopSyncData() {
     alertChangeDeviceShown = false;
     location.reload();
   });
+
+  // 停止余额数据请求
+  stopUpdateTokensUsed();
 }
 
 
@@ -414,6 +422,8 @@ function monitorPageVisible() {
         window.clearInterval(autoSyncTimeRepeat);
         autoSyncTimeRepeat = null;
         syncDataToServer();
+        // 余额信息暂停
+        stopUpdateTokensUsed();
       } else {
         // 页面从后台返回时的操作
         monitorlog("页面从后台返回，先检查设备登录状态，之后开启自动同步数据");
@@ -459,7 +469,67 @@ function adjustPageUI() {
   }
 }
 
+/************************ tokens使用数据 ************************/
+function updateTokensUsed() {
+  function requestData(url: string, completeBlock: any) {
+    const access_control = JSON.parse(localStorage.getItem('access-control') || '{}');
+    const statusData = access_control.state || {};
+    const token = statusData.token || '';
 
+    if (!token) {
+      completeBlock({});
+      return;
+    }
+
+    const headers = new Headers();
+    headers.append('Authorization', `Bearer ${token}`);
+    fetch(url, {
+      method: 'GET', // 根据需要设置请求方法
+      headers: headers
+    }).then(res => res.json()).then(response => {
+      // 处理响应
+      console.log(response);
+      completeBlock(response);
+    }).catch(error => {
+      // 处理错误
+      console.log(error);
+    });
+  }
+
+  // 订阅url
+  const subscriptionUrl = 'https://api.nextweb.fun/openai/dashboard/billing/subscription';
+  // 使用数据url
+  const useUrl = 'https://api.nextweb.fun/openai/dashboard/billing/usage';
+  requestData(subscriptionUrl, (subscriptionData: any) => {
+    requestData(useUrl, (useData: any) => {
+      const total_usage = (useData.total_usage || 0) / 100;
+      const system_hard_limit = (subscriptionData.system_hard_limit || 0);
+      console.log(`总共${system_hard_limit},已使用${total_usage}`);
+      updateUseDom(total_usage, system_hard_limit);
+    });
+  });
+}
+
+function updateUseDom(use: any, total: any) {
+  const div_used_info = document.getElementById('div_used_info');
+  if (!div_used_info) {
+    return;
+  }
+  div_used_info.innerHTML = `总量:${(total / 10000).toFixed(2)}w,消耗:${(use / 10000).toFixed(2)}w`;
+}
+
+let autoUpdateTokensTimeRepeat: any = null;
+function startUpdateTokensUsed() {
+  autoUpdateTokensTimeRepeat = window.setInterval(() => {
+    updateTokensUsed();
+  }, 60 * 1000);
+
+  updateTokensUsed();
+}
+
+function stopUpdateTokensUsed() {
+  window.clearInterval(autoUpdateTokensTimeRepeat);
+}
 /************************ 登录信息展示 ************************/
 function addCurrentLoginInfo() {
   const myCookie = localStorage.getItem('myCookie');
@@ -481,7 +551,10 @@ function addCurrentLoginInfo() {
   justify-content: space-between;
   `;
   loginDom.innerHTML = `
-  ${userName}
+  <div>
+    ${userName}
+    <div id="div_used_info" style="font-size: 12px;color: gray;margin-top: 5px;"></div>
+  </div>
   <button id="button_logout" class="button_icon-button__VwAMf">退出登录</button>
   `;
   // home_sidebar-header___NHg_
