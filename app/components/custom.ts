@@ -520,6 +520,8 @@ function updateUseDom(use: any, total: any) {
 
 let autoUpdateTokensTimeRepeat: any = null;
 function startUpdateTokensUsed() {
+  // 先清除
+  window.clearInterval(autoUpdateTokensTimeRepeat);
   autoUpdateTokensTimeRepeat = window.setInterval(() => {
     updateTokensUsed();
   }, 60 * 1000);
