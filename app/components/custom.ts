@@ -467,6 +467,9 @@ function adjustPageUI() {
     const githubBtn = githubA.parentNode!.parentNode!.parentNode!.parentNode;
     githubBtn!.parentNode!.removeChild(githubBtn!);
   }
+
+  // 修改网页标题
+  document.title = 'ChatGPT';
 }
 
 /************************ tokens使用数据 ************************/
