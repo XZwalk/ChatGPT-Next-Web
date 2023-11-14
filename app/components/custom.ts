@@ -608,6 +608,7 @@ function addCurrentLoginInfo() {
     showAlert(`退出登录提醒`, `退出登录后本地数据会全部清除，确定退出吗？`, '退出登录', true, () => {
       stopSyncData();
       // 清除当前登录信息
+      (window as any).clearCookie();
       localStorage.removeItem('myCookie');
       localStorage.removeItem('access-control');
       localStorage.removeItem('chat-next-web-store');
