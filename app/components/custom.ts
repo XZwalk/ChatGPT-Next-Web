@@ -574,8 +574,8 @@ function stopUpdateTokensUsed() {
 }
 /************************ 登录信息展示 ************************/
 function addCurrentLoginInfo() {
-  const myCookie = localStorage.getItem('myCookie');
-  if (!myCookie) {
+  const myCookieJsonData = getCookie();
+  if (!myCookieJsonData.email || !myCookieJsonData.token) {
     return;
   }
 
@@ -583,7 +583,6 @@ function addCurrentLoginInfo() {
     return;
   }
 
-  const myCookieJsonData = JSON.parse(myCookie);
   const emailName = myCookieJsonData.email;
   // 创建要插入的新元素
   const loginDom = document.createElement('div');
