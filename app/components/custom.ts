@@ -45,6 +45,8 @@ function beigin() {
     adjustPageUI();
     // 更新消耗tokens数据
     startUpdateTokensUsed();
+    // 添加登录系统
+    addAccountDom();
   });
 }
 
@@ -293,15 +295,10 @@ function addAccountDom() {
         div_account_manager.style.display = 'none';
         document.body.appendChild(div_account_manager);
         (window as any).initWithDomID('div_account_manager');
-        (window as any).openAccountPopup();
         // 登录弹窗展示的相关配置
         // accountConfig.backImageUrl = require('./resources/jike.png');
         // accountConfig.backgroundColor = 'rgb(255 241 204)';
         // accountConfig.copyRight = '';
-        const closeDom = document.querySelector('.popup-content .close') as HTMLSpanElement;
-        if (closeDom) {
-          closeDom.style.display = 'none';
-        }
         // }
       } catch (error) {
         console.log(error);
@@ -312,7 +309,21 @@ function addAccountDom() {
 
 
 function showLoginPop() {
-  addAccountDom();
+  const tmpRepeat = window.setInterval(() => {
+    const div_account_manager = document.getElementById('div_account_manager');
+    if (div_account_manager) {
+      zxlog(`检测到登录组件，清除登录组价检测计时器`);
+      window.clearInterval(tmpRepeat);
+
+      // 弹出登录弹窗
+      (window as any).openAccountPopup();
+      const closeDom = document.querySelector('.popup-content .close') as HTMLSpanElement;
+      if (closeDom) {
+        closeDom.style.display = 'none';
+      }
+    }
+  }, 500);
+
   return;
 
   if (!document.getElementById('div_pop')) {
