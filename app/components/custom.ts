@@ -300,6 +300,7 @@ function addAccountDom() {
         // accountConfig.backgroundColor = 'rgb(255 241 204)';
         // accountConfig.copyRight = '';
         // }
+        zxlog(`登录组件加载完成`);
       } catch (error) {
         console.log(error);
       }
