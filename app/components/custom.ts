@@ -286,22 +286,23 @@ function addAccountDom() {
       'https://personal.xiangzi.site/Public/Front/js/request.js',
     ], () => {
       try {
-        if (!(window as any).isLogin()) {
-          const div_account_manager = document.createElement('div');
-          div_account_manager.id = 'div_account_manager';
-          div_account_manager.style.display = 'none';
-          document.body.appendChild(div_account_manager);
-          (window as any).initWithDomID('div_account_manager');
-          (window as any).openAccountPopup();
-          // 登录弹窗展示的相关配置
-          // accountConfig.backImageUrl = require('./resources/jike.png');
-          // accountConfig.backgroundColor = 'rgb(255 241 204)';
-          // accountConfig.copyRight = '';
-          const closeDom = document.querySelector('.popup-content .close') as HTMLSpanElement;
-          if (closeDom) {
-            closeDom.style.display = 'none';
-          }
+        // 这里是确定需要登录了，不再判断当前是否已登录，以接口为准
+        // if (!(window as any).isLogin()) {
+        const div_account_manager = document.createElement('div');
+        div_account_manager.id = 'div_account_manager';
+        div_account_manager.style.display = 'none';
+        document.body.appendChild(div_account_manager);
+        (window as any).initWithDomID('div_account_manager');
+        (window as any).openAccountPopup();
+        // 登录弹窗展示的相关配置
+        // accountConfig.backImageUrl = require('./resources/jike.png');
+        // accountConfig.backgroundColor = 'rgb(255 241 204)';
+        // accountConfig.copyRight = '';
+        const closeDom = document.querySelector('.popup-content .close') as HTMLSpanElement;
+        if (closeDom) {
+          closeDom.style.display = 'none';
         }
+        // }
       } catch (error) {
         console.log(error);
       }
