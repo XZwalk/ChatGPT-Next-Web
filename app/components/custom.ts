@@ -311,6 +311,7 @@ function addAccountDom() {
 function showLoginPop() {
   const tmpRepeat = window.setInterval(() => {
     const div_account_manager = document.getElementById('div_account_manager');
+    zxlog(`登录组价检测计时器`);
     if (div_account_manager) {
       zxlog(`检测到登录组件，清除登录组价检测计时器`);
       window.clearInterval(tmpRepeat);
