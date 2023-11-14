@@ -259,24 +259,61 @@ function hideLoading() {
 
 /************************ 登录操作 ************************/
 function getCookie() {
-  let cookieStr = null;
-  if (typeof localStorage !== 'undefined') {
-    cookieStr = localStorage.getItem('myCookie');
-  }
-  if (cookieStr) {
-    return JSON.parse(cookieStr);
-  }
+  const tokenStr = getCookiWithKey('token');
+  const emailStr = getCookiWithKey('email');
+
   return {
-    userName: '',
-    token: ''
+    email: emailStr || '',
+    token: tokenStr || ''
   };
   // return {
-  //   userName: 'zhangxiang',
+  //   email: 'zhangxiang',
   //   token: '12345633'
   // };
 }
 
+function addAccountDom() {
+  loadMultipleCSS([
+    'https://personal.xiangzi.site/Public/Front/tools/nav/nav.css',
+    'https://personal.xiangzi.site/Public/Front/tools/account/account.css'
+  ]);
+
+  // '../../../../../Public/Front/js/urlHandle.js'
+  loadMultipleJS(['https://personal.xiangzi.site/Public/Front/js/urlHandle.js'], () => {
+    loadMultipleJS([
+      'https://personal.xiangzi.site/Public/Front/tools/account/account.js',
+      'https://personal.xiangzi.site/Public/Front/tools/nav/nav.js',
+      'https://personal.xiangzi.site/Public/Front/js/request.js',
+    ], () => {
+      try {
+        if (!isLogin()) {
+          const div_account_manager = document.createElement('div');
+          div_account_manager.id = 'div_account_manager';
+          div_account_manager.style.display = 'none';
+          document.body.appendChild(div_account_manager);
+          initWithDomID('div_account_manager');
+          openAccountPopup();
+          // 登录弹窗展示的相关配置
+          // accountConfig.backImageUrl = require('./resources/jike.png');
+          // accountConfig.backgroundColor = 'rgb(255 241 204)';
+          // accountConfig.copyRight = '';
+          const closeDom = document.querySelector('.popup-content .close') as HTMLSpanElement;
+          if (closeDom) {
+            closeDom.style.display = 'none';
+          }
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    });
+  });
+}
+
+
 function showLoginPop() {
+  addAccountDom();
+  return;
+
   if (!document.getElementById('div_pop')) {
     const popDom = document.createElement('div');
     popDom.innerHTML = `
@@ -330,7 +367,7 @@ function getApiDomain() {
 
 function deviceLogin(completeBlock: (arg0: any) => void) {
   const loginInfo = getCookie();
-  const indexUrl = `${getApiDomain()}/ChatGPT/login?userName=${loginInfo.userName}&token=${loginInfo.token}&deviceToken=${getDeviceToken()}`;
+  const indexUrl = `${getApiDomain()}/ChatGPT/login?email=${loginInfo.email}&token=${loginInfo.token}&deviceToken=${getDeviceToken()}`;
   fetch(indexUrl, { method: 'GET' }).then(res => res.json()).then(function (result) {
     if (result.code !== 200) {
       zxlog(`/ChatGPT/login：${result.msg}`);
@@ -345,7 +382,7 @@ function deviceLogin(completeBlock: (arg0: any) => void) {
 
 function checkServerCurrentDeviceToken(completeBlock: (arg0: boolean | null) => void) {
   const loginInfo = getCookie();
-  const indexUrl = `${getApiDomain()}/ChatGPT/deviceToken?userName=${loginInfo.userName}&token=${loginInfo.token}`;
+  const indexUrl = `${getApiDomain()}/ChatGPT/deviceToken?email=${loginInfo.email}&token=${loginInfo.token}`;
   fetch(indexUrl, { method: 'GET' }).then(res => res.json()).then(function (result) {
     console.log(result);
     const localDeviceToken = getDeviceToken();
@@ -363,7 +400,7 @@ function checkServerCurrentDeviceToken(completeBlock: (arg0: boolean | null) => 
 // 从云端获取候选人数据，云端不存在则创建一条数据
 function getAllChatData(completeBlock: (arg0: any) => void) {
   const loginInfo = getCookie();
-  const indexUrl = `${getApiDomain()}/ChatGPT/allData?userName=${loginInfo.userName}&token=${loginInfo.token}`;
+  const indexUrl = `${getApiDomain()}/ChatGPT/allData?email=${loginInfo.email}&token=${loginInfo.token}`;
   fetch(indexUrl, { method: 'GET' }).then(res => res.json()).then(function (result) {
     if (result.code !== 200) {
       zxlog(`/ChatGPT/allData：${result.msg}`);
@@ -387,7 +424,7 @@ function syncData(store: any, completeBlock: (arg0: any) => void) {
     },
     method: "POST",
     body: JSON.stringify({
-      userName: loginInfo.userName,
+      email: loginInfo.email,
       token: loginInfo.token,
       store: store,
       deviceToken: getDeviceToken(),
@@ -547,7 +584,7 @@ function addCurrentLoginInfo() {
   }
 
   const myCookieJsonData = JSON.parse(myCookie);
-  const userName = myCookieJsonData.userName;
+  const emailName = myCookieJsonData.email;
   // 创建要插入的新元素
   const loginDom = document.createElement('div');
   loginDom.id = 'div_login_info';
@@ -557,7 +594,7 @@ function addCurrentLoginInfo() {
   `;
   loginDom.innerHTML = `
   <div>
-    ${userName}
+    ${emailName}
     <div id="div_used_info" style="font-size: 12px;color: gray;margin-top: 5px;"></div>
   </div>
   <button id="button_logout" class="button_icon-button__VwAMf">退出登录</button>
@@ -680,4 +717,54 @@ function zxlog(logStr: string) {
 
 function monitorlog(logStr: string) {
   console.log(`%c${logStr}`, "color: red; font-weight: bold;");
+}
+
+function loadMultipleCSS(cssUrls: Array<string>) {
+  if (typeof document === "undefined") {
+    return;
+  }
+  const head = document.head || document.getElementsByTagName('head')[0];
+
+  for (var i = 0; i < cssUrls.length; i++) {
+    const cssDom = document.createElement('link');
+    cssDom.rel = 'stylesheet';
+    cssDom.href = cssUrls[i];
+    head.appendChild(cssDom);
+  }
+}
+
+
+function loadMultipleJS(jsUrls: Array<string>, callback: any) {
+  if (typeof document === "undefined") {
+    return;
+  }
+  const head = document.head || document.getElementsByTagName('head')[0];
+
+  let loadedCount = 0;
+
+  function checkAllLoaded() {
+    loadedCount++;
+    if (loadedCount === jsUrls.length) {
+      callback();
+    }
+  }
+
+  for (var i = 0; i < jsUrls.length; i++) {
+    var js = document.createElement('script');
+    js.src = jsUrls[i];
+    js.onload = checkAllLoaded;
+    head.appendChild(js);
+  }
+}
+
+
+function getCookiWithKey(name: string) {
+  if (typeof document === "undefined") {
+    return '';
+  }
+  var arr, reg = new RegExp("(^| )" + name + "=([^;]*)(;|$)");
+  if (arr = document.cookie.match(reg))
+    return decodeURI(arr[2]);
+  else
+    return '';
 }
