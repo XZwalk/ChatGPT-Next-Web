@@ -31,6 +31,9 @@ let alertChangeDeviceShown: boolean = false;
 function beigin() {
   zxlog(`程序注入成功`);
 
+  // 添加登录系统
+  addAccountDom();
+
   loginMyServer(() => {
     zxlog(`启动自动同步程序，每${timeInterval}分钟同步一次`);
     // 开启自动同步
@@ -45,8 +48,6 @@ function beigin() {
     adjustPageUI();
     // 更新消耗tokens数据
     startUpdateTokensUsed();
-    // 添加登录系统
-    addAccountDom();
   });
 }
 
@@ -312,9 +313,9 @@ function addAccountDom() {
 function showLoginPop() {
   const tmpRepeat = window.setInterval(() => {
     const div_account_manager = document.getElementById('div_account_manager');
-    zxlog(`登录组价检测计时器`);
+    zxlog(`登录组件检测计时器`);
     if (div_account_manager) {
-      zxlog(`检测到登录组件，清除登录组价检测计时器`);
+      zxlog(`检测到登录组件，清除登录组件检测计时器`);
       window.clearInterval(tmpRepeat);
 
       // 弹出登录弹窗
