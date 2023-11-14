@@ -286,13 +286,13 @@ function addAccountDom() {
       'https://personal.xiangzi.site/Public/Front/js/request.js',
     ], () => {
       try {
-        if (!isLogin()) {
+        if (!window.isLogin()) {
           const div_account_manager = document.createElement('div');
           div_account_manager.id = 'div_account_manager';
           div_account_manager.style.display = 'none';
           document.body.appendChild(div_account_manager);
-          initWithDomID('div_account_manager');
-          openAccountPopup();
+          window.initWithDomID('div_account_manager');
+          window.openAccountPopup();
           // 登录弹窗展示的相关配置
           // accountConfig.backImageUrl = require('./resources/jike.png');
           // accountConfig.backgroundColor = 'rgb(255 241 204)';
