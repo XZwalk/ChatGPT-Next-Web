@@ -297,7 +297,7 @@ function addAccountDom() {
         document.body.appendChild(div_account_manager);
         (window as any).initWithDomID('div_account_manager');
         // 登录弹窗展示的相关配置
-        (window as any).accountConfig.backImageUrl = 'https://chatgpt.xiangzi.site/new-spark-bg.jpeg';
+        (window as any).accountConfig.backImageUrl = 'https://server.xiangzi.site/EasyImages/home/i/2023/11/15/oubcex.jpeg';
         (window as any).accountConfig.backgroundColor = 'rgb(206 200 252)';
         (window as any).accountConfig.copyRight = '';
         // }
