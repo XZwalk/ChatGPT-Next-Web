@@ -297,9 +297,9 @@ function addAccountDom() {
         document.body.appendChild(div_account_manager);
         (window as any).initWithDomID('div_account_manager');
         // 登录弹窗展示的相关配置
-        // accountConfig.backImageUrl = require('./resources/jike.png');
-        // accountConfig.backgroundColor = 'rgb(255 241 204)';
-        // accountConfig.copyRight = '';
+        (window as any).accountConfig.backImageUrl = 'https://chatgpt.xiangzi.site/new-spark-bg.jpeg';
+        (window as any).accountConfig.backgroundColor = 'rgb(206 200 252)';
+        (window as any).accountConfig.copyRight = '';
         // }
         zxlog(`登录组件加载完成`);
       } catch (error) {
