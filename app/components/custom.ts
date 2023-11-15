@@ -108,7 +108,7 @@ function stopSyncData() {
 function requestAllDataOnline(completeBlock: (arg0: any) => void) {
   getAllChatData((allData) => {
     if (allData && allData.state) {
-      showAlert('数据同步提醒', `已在当前设备登录成功，其他设备已下线，点击按钮，远端数据将覆盖本地数据。`, '覆盖本地数据', false, () => {
+      showAlert('数据同步提醒', `已在当前设备登录成功，其他设备已下线，点击按钮，远端数据将覆盖本地数据。（‼️注意:如果点击取消，则会使用本地数据覆盖远端数据，请谨慎操作）`, '覆盖本地数据', false, () => {
         loadingWithDesc('检测到更换设备登录，需要把服务器数据覆盖到本地，正在执行数据覆盖操作，请勿刷新页面或者进行其他操作', 10, () => {
           // 这里不能直接写入，页面节点加载较慢，可能数据写入成功以后又被覆盖掉了，所以得等页面加载完成以后再写入数据，防止数据被覆盖掉
           localStorage.setItem('chat-next-web-store', JSON.stringify(allData));
